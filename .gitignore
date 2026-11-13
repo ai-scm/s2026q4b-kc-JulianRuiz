@@ -1,0 +1,18 @@
+# Secretos (Twelve-Factor III: la config no va en el código)
+.env
+.env.*
+!.env.example
+client_secret*.json
+
+# Datos de Keycloak (su base de datos guarda usuarios y secretos)
+keycloak_data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Editor y sistema
+.vscode/
+.idea/
+.DS_Store
