@@ -2,6 +2,8 @@
 
 Entorno local de **Keycloak 26.8.2** en Docker, con un realm propio, inicio de sesión federado con **Google** y una aplicación web en **Python (Flask)** que, una vez autenticado el usuario, muestra `Hola Mundo, <usuario>`.
 
+**Resultados de valor:** Keycloak queda corriendo en local con Docker y sus datos persisten en un volumen mapeado, de modo que la configuración sobrevive a reinicios y recreaciones del contenedor. El realm `semillero` centraliza la identidad de la aplicación: define los roles `usuario` y `admin`, asigna `usuario` automáticamente a toda cuenta nueva y registra la aplicación como cliente confidencial con flujo Authorization Code y PKCE. Google funciona como proveedor de identidad externo, así que cualquier cuenta de Google autorizada puede entrar sin crear una contraseña nueva, y Keycloak crea y vincula el usuario en el realm en su primer inicio de sesión. La aplicación dummy delega por completo la autenticación en Keycloak, nunca maneja contraseñas ni habla directamente con Google, y muestra `Hola Mundo, <usuario>` con el nombre y los roles que recibe en el ID token. Los secretos se mantienen fuera del repositorio mediante variables de entorno.
+
 ---
 
 ## ✅ Resultados
@@ -237,34 +239,6 @@ Authlib obtiene los endpoints de Keycloak desde el documento de descubrimiento (
 | Modo debug de Flask | Desactivado |
 
 `start-dev` y el servidor de desarrollo de Flask son válidos solo para pruebas locales.
-
----
-
-## Twelve-Factor App
-
-| # | Factor | Aplicación |
-|---|---|---|
-| I | Codebase | Un repositorio versionado con Git |
-| II | Dependencies | `requirements.txt` con entorno virtual aislado; imagen de Keycloak con versión fija |
-| III | Config | Toda la configuración en variables de entorno; `.env` fuera del repositorio |
-| IV | Backing services | Keycloak es un recurso externo identificado solo por `KEYCLOAK_URL` |
-| V | Build, release, run | Instalar dependencias y descargar la imagen; combinar con la configuración; ejecutar |
-| VI | Processes | La app no guarda estado en disco; la sesión va en una cookie firmada |
-| VII | Port binding | La app expone su propio puerto (`APP_PORT`) |
-| VIII | Concurrency | Escalable agregando procesos detrás de un servidor WSGI |
-| IX | Disposability | Arranque y parada rápidos; los datos de Keycloak sobreviven en el volumen |
-| X | Dev/prod parity | La misma imagen de Keycloak sirve en producción |
-| XI | Logs | La app y Keycloak escriben a la salida estándar |
-| XII | Admin processes | El export del realm se ejecuta como tarea puntual |
-
-### Cambios necesarios para producción
-
-- Keycloak con `start`, HTTPS y `KC_HOSTNAME` configurado.
-- Base de datos externa (PostgreSQL) en lugar de H2.
-- Servidor WSGI (gunicorn) en lugar del servidor de desarrollo de Flask.
-- `SESSION_COOKIE_SECURE=True` sobre HTTPS.
-- Secretos en un gestor (AWS Secrets Manager, Vault) en lugar de `.env`.
-- App de Google publicada y verificada, en lugar del modo *Testing*.
 
 ---
 
